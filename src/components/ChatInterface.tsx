@@ -1,3 +1,4 @@
+// ... [importações mantidas como estão]
 import React, { useRef, useState, useEffect } from 'react';
 import Message from './Message';
 import InputArea from './InputArea';
@@ -6,11 +7,20 @@ import { useTheme } from '../context/ThemeContext';
 import { getSampleMessages } from '../data/sampleConversations';
 import { MessageType } from '../types';
 
-interface ChatInterfaceProps {
-  isSidebarOpen: boolean;
-  toggleSidebar: () => void;
-  activeConversationId: string | null;
-}
+const callBedrockAPI = async (prompt: string): Promise<string> => {
+  try {
+    const res = await fetch('https://3rmsznjnw7.execute-api.us-east-1.amazonaws.com/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+
+    const data = await res.json();
+    return data?.content?.[0]?.text || JSON.stringify(data, null, 2);
+  } catch (err: any) {
+    return `Erro ao chamar API: ${err.message}`;
+  }
+};
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
   isSidebarOpen, 
@@ -22,7 +32,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load messages when conversation changes
   useEffect(() => {
     if (activeConversationId) {
       setMessages(getSampleMessages(activeConversationId));
@@ -39,45 +48,30 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
 
-    // Add user message
     const newUserMessage: MessageType = {
       id: `msg_${Date.now()}`,
       content,
       role: 'user',
       timestamp: new Date().toISOString(),
     };
-    
+
     setMessages(prev => [...prev, newUserMessage]);
     setIsLoading(true);
 
-    // Simulate AI response after a delay
-    setTimeout(() => {
-      const aiResponse: MessageType = {
-        id: `msg_${Date.now() + 1}`,
-        content: generateAIResponse(content),
-        role: 'assistant',
-        timestamp: new Date().toISOString(),
-      };
-      
-      setMessages(prev => [...prev, aiResponse]);
-      setIsLoading(false);
-    }, 1000);
-  };
+    const bedrockResponseText = await callBedrockAPI(content);
 
-  const generateAIResponse = (userMessage: string): string => {
-    // Simple response generation for demo
-    if (userMessage.toLowerCase().includes('hello') || userMessage.toLowerCase().includes('hi')) {
-      return "Hello! How can I assist you today?";
-    } else if (userMessage.toLowerCase().includes('help')) {
-      return "I'm here to help. Could you provide more details about what you need assistance with?";
-    } else if (userMessage.toLowerCase().includes('thank')) {
-      return "You're welcome! Is there anything else you'd like to know?";
-    } else {
-      return "I understand you said: \"" + userMessage + "\". How can I help you with this?";
-    }
+    const aiResponse: MessageType = {
+      id: `msg_${Date.now() + 1}`,
+      content: bedrockResponseText,
+      role: 'assistant',
+      timestamp: new Date().toISOString(),
+    };
+
+    setMessages(prev => [...prev, aiResponse]);
+    setIsLoading(false);
   };
 
   const welcomeMessage = () => (
@@ -110,10 +104,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         {messages.length > 0 ? (
           <div className="flex flex-col pb-32 pt-4">
             {messages.map((message) => (
-              <Message 
-                key={message.id} 
-                message={message} 
-              />
+              <Message key={message.id} message={message} />
             ))}
             {isLoading && (
               <div className={`flex items-center p-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'} mx-auto my-2 rounded-lg max-w-3xl`}>
