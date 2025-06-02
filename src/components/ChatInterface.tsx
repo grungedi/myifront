@@ -12,7 +12,7 @@ const callBedrockAPI = async (prompt: string): Promise<string> => {
     const res = await fetch('https://3rmsznjnw7.execute-api.us-east-1.amazonaws.com/query', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ query: prompt }),
     });
 
     const data = await res.json();
