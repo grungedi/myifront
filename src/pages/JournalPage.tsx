@@ -67,27 +67,31 @@ Texto: "${text}"
   };
 
   return (
-    <div className={`min-h-screen p-6 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-      <h1 className="text-3xl font-bold mb-4">Meu Diário – My, I</h1>
-      <p className="mb-6 text-lg">Escreva livremente. Esse espaço é só seu.</p>
+    <div className={`flex-1 px-6 py-8 overflow-y-auto ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-4">Meu Diário – My, I</h1>
+        <p className="mb-6 text-lg">Escreva livremente. Esse espaço é só seu.</p>
 
-      <InputArea onSendMessage={handleJournalEntry} />
+        <InputArea onSendMessage={handleJournalEntry} />
 
-      {loading && (
-        <div className="mt-4 text-blue-500">Refletindo sobre o que você escreveu…</div>
-      )}
+        {loading && (
+          <div className="mt-4 text-blue-500">Refletindo sobre o que você escreveu…</div>
+        )}
 
-      <div className="mt-8 space-y-6">
-        {entries
-          .slice()
-          .reverse()
-          .map((entry) => (
-            <div key={entry.id} className="p-4 rounded-lg shadow bg-opacity-30 border border-gray-300 dark:border-gray-600">
-              <p className="text-sm opacity-70 mb-2">{new Date(entry.timestamp).toLocaleString()}</p>
-              <p className="mb-2 whitespace-pre-wrap"><strong>Você:</strong> {entry.input}</p>
-              <p className="whitespace-pre-wrap"><strong>Reflexão:</strong> {entry.ai_reflection}</p>
-            </div>
-        ))}
+        <div className="mt-10 space-y-6">
+          {entries
+            .slice()
+            .reverse()
+            .map((entry) => (
+              <div key={entry.id} className={`p-6 rounded-lg shadow-sm border text-sm whitespace-pre-wrap ${
+                theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-300'
+              }`}>
+                <p className="text-xs mb-2 opacity-60">{new Date(entry.timestamp).toLocaleString()}</p>
+                <p className="mb-3"><strong>Você:</strong> {entry.input}</p>
+                <p><strong>Reflexão:</strong> {entry.ai_reflection}</p>
+              </div>
+          ))}
+        </div>
       </div>
     </div>
   );
