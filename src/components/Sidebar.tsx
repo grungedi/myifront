@@ -1,8 +1,9 @@
 import React from 'react';
-import { Plus, X, Moon, Sun } from 'lucide-react';
+import { Plus, X, Moon, Sun, Book } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import ConversationItem from './ConversationItem';
 import { sampleConversations } from '../data/sampleConversations';
+import { Link, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -20,10 +21,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   setActiveConversationId
 }) => {
   const { theme, toggleTheme } = useTheme();
-  
+  const location = useLocation();
+
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && (
         <div 
           className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
@@ -31,7 +32,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
       
-      {/* Sidebar */}
       <div 
         className={`fixed top-0 bottom-0 left-0 w-80 z-30 flex flex-col transition-transform duration-300 ease-in-out transform ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -39,7 +39,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'
         }`}
       >
-        {/* New chat button */}
         <div className="p-3">
           <button
             onClick={onNewChat}
@@ -54,7 +53,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
         
-        {/* Conversations list */}
         <div className="flex-1 overflow-y-auto px-3 py-2">
           <h2 className="text-sm font-medium px-3 mb-2 text-gray-500">Recent conversations</h2>
           {sampleConversations.map(conversation => (
@@ -65,9 +63,24 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => setActiveConversationId(conversation.id)}
             />
           ))}
+
+          <div className="mt-6">
+            <Link
+              to="/journal"
+              className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                location.pathname === '/journal'
+                  ? theme === 'dark' 
+                    ? 'bg-gray-800' 
+                    : 'bg-white'
+                  : ''
+              } hover:bg-gray-200 dark:hover:bg-gray-700`}
+            >
+              <Book size={16} className="mr-2" />
+              <span className="font-medium">Journal</span>
+            </Link>
+          </div>
         </div>
         
-        {/* Bottom actions */}
         <div className={`p-3 border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
           <button
             onClick={toggleTheme}
@@ -91,7 +104,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
         
-        {/* Close button (mobile only) */}
         <button
           className="md:hidden absolute top-3 right-3 p-2 rounded-full bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
           onClick={onToggle}
